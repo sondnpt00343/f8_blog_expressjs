@@ -1,50 +1,63 @@
+const User = require('../models/user.model')
+
 module.exports = {
     // Get all users
     // [GET] /
-    index(req, res) {
-        res.json([
-            'All users'
-        ])
+    async index(req, res) {
+        const users = await User.find({}).sort({ createdAt: -1 })
+        res.json({ data: users })
     },
 
     // Create a user
     // [POST] /
-    store(req, res) {
-        // 1. Nhận thông tin user từ body request
-        // 2. Import User model và tạo user mới từ thông tin (1)
-        // 3. Nhận lại user vừa tạo từ model và response về cho client
-        const result = {
-            name: req.body.name,
-            email: req.body.email,
-            password: req.body.password,
+    async store(req, res) {
+        try {
+            const user = new User({
+                name: req.body.name,
+                email: req.body.email,
+                password: req.body.password,
+            })
+            const newUser = await user.save()
+            res.status(201).json({ data: newUser })
+        } catch (error) {
+            console.log(error)
+            res.status(400).send('Bad request.')
         }
-
-        res.status(201).json({
-            data: result
-        })
     },
 
     // Get a user by ID
     // [GET] /:id
-    show(req, res) {
-        res.json([
-            'A user'
-        ])
+    async show(req, res) {
+        const user = await User.findById(req.params.id).exec()
+        res.json({ data: user })
     },
 
     // Update a user
     // [PUT] /:id
-    update(req, res) {
-        res.json([
-            'Update user'
-        ])
+    async update(req, res) {
+        await User.findOneAndUpdate({
+            _id: req.params.id
+        }, {
+            name: req.body.name,
+            email: req.body.email,
+            password: req.body.password,
+        })
+        const user = await User.findById(req.params.id).exec()
+        res.json({ data: user })
     },
 
     // Delete a user
     // [PUT] /:id
-    destroy(req, res) {
-        res.json([
-            'Delete user'
-        ])
+    async destroy(req, res) {
+        const user = await User.findById(req.params.id).exec()
+        if (!user) {
+            res.status(404).json({
+                code: 404,
+                message: 'Resource not found.'
+            })
+        }
+
+        await User.findByIdAndDelete(req.params.id)
+        res.status(204).send(null)
     }
 }
