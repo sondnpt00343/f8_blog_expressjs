@@ -3,6 +3,7 @@ const morgan = require('morgan')
 const routes = require('./src/routes')
 const cors = require('cors')
 const dbConnect = require('./src/lib/mongodb')
+// const jwt = require('./src/helpers/jwt')
 
 // Connect to MongoDB
 dbConnect()
@@ -15,6 +16,7 @@ app.use(morgan('combined'))
 app.use('/assets', express.static('public'))
 app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ extended: true, limit: '10mb' }))
+// app.use(jwt())
 
 // routes
 routes(app)
